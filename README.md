@@ -1,0 +1,1 @@
+# gifmaker-create-image-tags
