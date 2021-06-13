@@ -13,14 +13,21 @@ from DynamoTableClient import DynamoTableClient
 LOCAL_MODE = False
 
 # reduce cost by limiting num of frames passes to AWS Rekognition
-# TODO: move to param store?
 MAX_FRAMES_USED = 2
 
 img_rekognition_client = boto3.client('rekognition')
+
 if not LOCAL_MODE:
     s3_client = boto3.client('s3')
 
     dynamo_table_client = DynamoTableClient('gifs')
+
+    ssm_client = boto3.client('ssm')
+    try:
+        MAX_FRAMES_USED = int(ssm_client.get_parameter(Name="create-image-tags-max-frames-used")['Parameter']['Value'])
+        print(f"Using ssm value of MAX_FRAMES_USED={MAX_FRAMES_USED}")
+    except (ssm_client.exceptions.ParameterNotFound, KeyError) as e:
+        print(f"Using default MAX_FRAMES_USED={MAX_FRAMES_USED}")
 
 
 def analyze_video(vid_path: str):
